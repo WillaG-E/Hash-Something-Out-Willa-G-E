@@ -1,5 +1,5 @@
 #Author: Willa Galipeau-Eldridge
-#Date: 11/23/2025
+#Date: 11/24/2025
 #Purpose: HW5: Hash Something Out; Hash Tables
 
 import time
@@ -25,14 +25,15 @@ def hashFunction(stringData):
     #do things to stringData, turn it into an int
     #return key
     key = 0
-    #if stringData is none return
+    #if stringData is none return and don't continue
     if not stringData:
-         return 0
+        return 0
     for character in stringData:
         key += ord(character)
     return key #go through each charater in stringData converting them into an int
 
 def hashPolynomialRolling(stringData):
+    #if stringData is none return and don't continue
     if not stringData:
         return 0
     poly = 131 #polynomial bae
@@ -47,6 +48,7 @@ def hashPolynomialRolling(stringData):
     return key
 
 def hashMultiplicative(stringData):
+    #if stringData is none return and don't continue
     if not stringData:
         return 0
     
@@ -64,11 +66,22 @@ def hashMultiplicative(stringData):
 
     return int(fraction * 16000) #multiply the fraction by the size of the table
 
+def hashDJB2(stringData):
+    #if stringData is none return and don't continue
+    if not stringData:
+        return 0
+    
+    key = 5381 #initial prime number for the key value
+    for character in stringData:
+        key = (key * 33) + ord(character)
+    return key
+
+
 def buildHashTables(function):  
     #Create an empty Hash Table
-    size = 16000
-    movies = []
-    counter = 0
+    size = 16000 #sets a value for the size of the hash tables
+    movies = [] #creates an empty table
+    counter = 0 
 
     #Load the movie data from the provided input file
     file = "MOCK_DATA.csv"
@@ -85,7 +98,6 @@ def buildHashTables(function):
             #create a DataItem from row
             movie = DataItem(row)
             movies.append(movie)
-            #Parse the data to extract movie titles and quotes
             counter += 1
 
     #Hash Table 1: Movie Title as Key
@@ -145,6 +157,7 @@ def buildHashTables(function):
          if bucket == None: #checks for empty bucket
               wastedQuote += 1 #if the bucket is empty, then the counter for wastedQuote is incremented
 
+    #returns the values needed for the function that will print out the optimization statistics
     return {
         "titleTime": titleTime,
         "quoteTime": quoteTime,
@@ -154,6 +167,7 @@ def buildHashTables(function):
         "wastedQuote": wastedQuote
     }
 
+#function to print out the hash table statistics for both the movie titles and movie quotes
 def hashStatistics(attemptName, stats):
     titleTime = stats["titleTime"]
     quoteTime = stats["quoteTime"]
@@ -172,6 +186,7 @@ def hashStatistics(attemptName, stats):
     #time taken to construct the hash table
     print(f"Time Taken: {titleTime:0.6f} seconds")
 
+    #visual separator for each hash table statistics
     print()
     print("=" * 50)
 
@@ -185,19 +200,23 @@ def hashStatistics(attemptName, stats):
     #time taken to construct the hash table
     print(f"Time Taken: {quoteTime:0.6f} seconds")
 
+    #visual separator for each hash table statistics
     print()
     print("=" * 50)
 
 def main():
+    #create a tuple of all the different optimization function attempts and their names
     attempts = [
         ("Simple Sum Hash Table", hashFunction),
         ("Polynomial Rolling Hash Table", hashPolynomialRolling),
-        ("Multiplicative Hash Table", hashMultiplicative)
+        ("Multiplicative Hash Table", hashMultiplicative),
+        ("DJB2 Hash Table", hashDJB2)
     ]
 
+    #for each optimization attempt in the tuple above; it prints out a screenshot of the statistics
     for attemptName, function in attempts:
-        stats = buildHashTables(function)
-        hashStatistics(attemptName, stats)
+        stats = buildHashTables(function) #sends each individual hash function into the function that builds the hash tables
+        hashStatistics(attemptName, stats) #calls the function to print out the statistics
 
 
 if __name__ == "__main__":
