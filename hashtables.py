@@ -46,6 +46,23 @@ def hashPolynomialRolling(stringData):
         pPow = (pPow * poly) % primeMod
     return key
 
+def hashMultiplicative(stringData):
+    if not stringData:
+        return 0
+    
+    #converts the stringData entered into the function into an integer (key)
+    key = 0
+    poly = 31 #number to use for a polynomial-style accumulation
+    for character in stringData:
+        key = (key * poly + ord(character))
+    
+    #help keep key in a safe value so it isn't too large to use
+    key = key % 1000000000
+
+    knuthConstant = 0.61803398875 #Knuth's constant to fraction off the key
+    fraction = (key * knuthConstant) % 1
+
+    return int(fraction * 16000) #multiply the fraction by the size of the table
 
 def buildHashTables(function):  
     #Create an empty Hash Table
@@ -174,7 +191,8 @@ def hashStatistics(attemptName, stats):
 def main():
     attempts = [
         ("Simple Sum Hash Table", hashFunction),
-        ("Polynomial Rolling Hash Table", hashPolynomialRolling)
+        ("Polynomial Rolling Hash Table", hashPolynomialRolling),
+        ("Multiplicative Hash Table", hashMultiplicative)
     ]
 
     for attemptName, function in attempts:
