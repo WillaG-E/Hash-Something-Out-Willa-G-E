@@ -1,5 +1,5 @@
 #Author: Willa Galipeau-Eldridge
-#Date: 11/18/2025
+#Date: 11/23/2025
 #Purpose: HW5: Hash Something Out; Hash Tables
 
 import time
@@ -7,7 +7,6 @@ import csv
 import re
 from datetime import datetime
 
-#needed: handle collision function or inserts as a linkList
 class DataItem:
     def __init__(self, row):
         self.movie_title = row[0].strip()
@@ -25,79 +24,139 @@ class DataItem:
 def hashFunction(stringData):
     #do things to stringData, turn it into an int
     #return key
-    pass
+    key = 0
+    #if stringData is none return
+    if not stringData:
+         return 0
+    for character in stringData:
+        key += ord(character)
+    return key #go through each charater in stringData converting them into an int
 
-#Create an empty Hash Table
-size = 16000
-hashTitleTable = [None] * size
-hashQuoteTable = [None] * size
+def buildHashTables():  
+    #Create an empty Hash Table
+    size = 16000
+    movies = []
+    counter = 0
 
-counter = 0
-collisionsTitle = 0
-collisionsQuote = 0
-#Load the movie data from the provided input file
-file = "MOCK_DATA.csv"
-start = time.time()
-with open(file, 'r', newline='', encoding="utf8") as csvfile:
-    reader = csv.reader(csvfile)
-    for row in reader:
-        if (counter == 0):
-            continue
-        print(row)
-        #create a DataItem from row
-        movie = DataItem(row)
-        #feed the appropriate field into the hash function
-        #to get a key
+    #Load the movie data from the provided input file
+    file = "MOCK_DATA.csv"
+    with open(file, 'r', newline='', encoding="utf8") as csvfile:
+        reader = csv.reader(csvfile)
+        #skip the first row that contains column names
+        header = next(reader, None)
+
+        for row in reader:
+            if (counter == 0):
+                counter += 1
+                continue
+            #print(row)
+            #create a DataItem from row
+            movie = DataItem(row)
+            movies.append(movie)
+            #Parse the data to extract movie titles and quotes
+            counter += 1
+
+    #Hash Table 1: Movie Title as Key
+    #This hash table will use the movie title to store
+    #and retrieve movie records.
+    startTitle = time.time() #start time to record for title hash table
+    hashTitleTable = [None] * size #create empty hash table
+    collisionsTitle = 0 #help keep track of times something is already in the bucket
+    for movie in movies:
+        #feed the appropriate field into the hash function to get a key
         titleKey = hashFunction(movie.movie_title)
-        quoteKey = hashFunction(movie.quote)
         #mod the key value by the hash table length
+        titleIndex = titleKey % size
 
         #try to insert DataItem into hash table
         #check and see if a DataItem in there, if not insert
-        if hashTitleTable[titleKey] == None:
-                hashTitleTable[titleKey] = movie
+        if hashTitleTable[titleIndex] == None:
+                hashTitleTable[titleIndex] = [movie]
         else:
-             pass
-        
-        if hashQuoteTable[quoteKey] == None:
-                hashQuoteTable[quoteKey] = movie
+            collisionsTitle += 1 #increment collision counter for title, already a title there
+            hashTitleTable[titleIndex].append(movie)
+    
+    endTitle = time.time() #end time to record for title hash table
+    titleTime = endTitle - startTitle
+    #calculate the amount of unused buckets from title hash table
+    wastedTitle = 0
+    for bucket in hashTitleTable:
+         if bucket == None: #checks for empty bucket
+              wastedTitle += 1 #if the bucket is empty, then the counter for wastedTitle is incremented
+
+    #Hash Table 2: Movie Quote as Key
+    #This hash table will use the movie quote as the key
+    #to store and retrieve movie records.
+    startQuote = time.time() #start time to record for quote hash table
+    hashQuoteTable = [None] * size
+    collisionsQuote = 0 #help keep track of times something is already in the bucket
+    
+    for movie in movies:
+        #feed the appropriate field into the hash function to get a key
+        quoteKey = hashFunction(movie.quote)
+        #mod the key value by the hash table length
+        quoteIndex = quoteKey % size
+
+        #try to insert DataItem into hash table
+        #check and see if a DataItem in there, if not insert
+        if hashQuoteTable[quoteIndex] == None:
+            hashQuoteTable[quoteIndex] = [movie]
         else:
-             pass
-        hashTitleTable.append(titleKey)
-        hashQuoteTable.append(quoteKey)
-        #handle any collisions
-        #if counter = 0; don't insert
+            collisionsQuote += 1 #increment collision counter for quote, already a quote there
+            hashQuoteTable[quoteIndex].append(movie)
 
-        
-    #Parse the data to extract movie titles and quotes
-        counter += 1
-print(counter)
+    endQuote = time.time() #end time to record for quote hash table
+    quoteTime = endQuote - startQuote
+    #calculate the amount of unused buckets from title hash table
+    wastedQuote = 0
+    for bucket in hashQuoteTable:
+         if bucket == None: #checks for empty bucket
+              wastedQuote += 1 #if the bucket is empty, then the counter for wastedQuote is incremented
 
-#Handle any edge cases in the data (empty fields, special characters, etc.)
+    return {
+        "titleTime": titleTime,
+        "quoteTime": quoteTime,
+        "collisionsTitle": collisionsTitle,
+        "collisionsQuote": collisionsQuote,
+        "wastedTitle": wastedTitle,
+        "wastedQuote": wastedQuote
+    }
 
-#Create two separate hash tables
-#Hash Table 1: Movie Title as Key
-#This hash table will use the movie title to store
-#and retrieve movie records.
+def hashStatistics(attemptName, stats):
+    titleTime = stats["titleTime"]
+    quoteTime = stats["quoteTime"]
+    collisionsTitle = stats["collisionsTitle"]
+    collisionsQuote = stats["collisionsQuote"]
+    wastedTitle = stats["wastedTitle"]
+    wastedQuote = stats["wastedQuote"]
 
-#Hash Table 2: Movie Quote as Key
-#This hash table will use the movie quote as the key
-#to store and retrieve movie records.
-
-
-#5 optimization attempts must use fundamentally different approaches
-#prime numbers are key here
-    #linkedList
-    #Linear probing
-
-#track the following: #prino
+    #Optimization statistics for Title Hash Table
+    print("Hash Table: Movie Title")
+    print(f"Optimization Attempt:", attemptName)
     #amount of wasted space (unused buckets or slots)
+    print("Amount of Wasted Space:", wastedTitle)
     #number of collisions that occurred during construction
+    print("Number of Collisions:", collisionsTitle)
     #time taken to construct the hash table
-end = time.time()
-print(f"{end-start:0.2f} seconds")
+    print(f"Time Taken: {titleTime:0.6f} seconds")
 
-#Submit
-    #repository
-    #screenshots (10 total) of results of 5 hash function variations
-    #readMe --> analysis of methods
+    print()
+    print("=" * 50)
+
+    #Optimization statistics for Quote Hash Table
+    print("\nHash Table: Movie Quote")
+    print(f"Optimization Attempt:", attemptName)
+    #amount of wasted space (unused buckets or slots)
+    print("Amount of Wasted Space:", wastedQuote)
+    #number of collisions that occurred during construction
+    print("Number of Collisions:", collisionsQuote)
+    #time taken to construct the hash table
+    print(f"Time Taken: {quoteTime:0.6f} seconds")
+
+def main():
+    attemptName = "Simple Sum Hash"
+    stats = buildHashTables()
+    hashStatistics(attemptName, stats)
+
+if __name__ == "__main__":
+    main()
