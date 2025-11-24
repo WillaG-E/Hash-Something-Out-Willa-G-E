@@ -14,9 +14,11 @@ This method was the first attempt function so it served as a baseline to compare
       Number of Collisions: 12276
       Time Taken: 0.030605 seconds
 
-    While in this attempt the time taken wasn't an issue and the hash tables were compiled fast, the number of collisions and the amount of wasted space is very high. And it     seems that the hash table for movie quotes had more of a problem with wasted space and collisions.
+While in this attempt the time taken wasn't an issue and the hash tables were compiled fast, the number of collisions and the amount of wasted space is very high. And it seems that the hash table for movie quotes had more of a problem with wasted space and collisions.
+
 
 Optimization Attempt 2: Polynomial Rolling
+This method using an algorithm with a polynomial base number and large prime modulus performed significantly better than in attempt 1. There was a noticeable reduction in both wasted space and collisions after the first attempt but with that the speed was slowed down.
 
     Hash Table: Movie Title
       Amount of Wasted Space: 7916
@@ -26,6 +28,9 @@ Optimization Attempt 2: Polynomial Rolling
       Amount of Wasted Space: 6359
       Number of Collisions: 5358
       Time Taken: 0.101716 seconds
+
+In this attempt, the amount of wasted space and number of collisions were decrased by about half. But with this improvement, the amount of time it took was doubled for the movie title hash table and the movie quote hash table's time was more than tripled.
+
 
 Optimization Attempt 3: Multiplicative
 
