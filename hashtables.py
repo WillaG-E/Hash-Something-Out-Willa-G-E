@@ -32,7 +32,22 @@ def hashFunction(stringData):
         key += ord(character)
     return key #go through each charater in stringData converting them into an int
 
-def buildHashTables():  
+def hashPolynomialRolling(stringData):
+    if not stringData:
+        return 0
+    poly = 131 #polynomial bae
+    primeMod = int(1e9 +7) #large prime modulus
+
+    key = 0
+    pPow = 1
+
+    for character in stringData:
+        key = (key + (ord(character)+1) * pPow) % primeMod
+        pPow = (pPow * poly) % primeMod
+    return key
+
+
+def buildHashTables(function):  
     #Create an empty Hash Table
     size = 16000
     movies = []
@@ -64,7 +79,7 @@ def buildHashTables():
     collisionsTitle = 0 #help keep track of times something is already in the bucket
     for movie in movies:
         #feed the appropriate field into the hash function to get a key
-        titleKey = hashFunction(movie.movie_title)
+        titleKey = function(movie.movie_title)
         #mod the key value by the hash table length
         titleIndex = titleKey % size
 
@@ -93,7 +108,7 @@ def buildHashTables():
     
     for movie in movies:
         #feed the appropriate field into the hash function to get a key
-        quoteKey = hashFunction(movie.quote)
+        quoteKey = function(movie.quote)
         #mod the key value by the hash table length
         quoteIndex = quoteKey % size
 
@@ -153,10 +168,19 @@ def hashStatistics(attemptName, stats):
     #time taken to construct the hash table
     print(f"Time Taken: {quoteTime:0.6f} seconds")
 
+    print()
+    print("=" * 50)
+
 def main():
-    attemptName = "Simple Sum Hash"
-    stats = buildHashTables()
-    hashStatistics(attemptName, stats)
+    attempts = [
+        ("Simple Sum Hash Table", hashFunction),
+        ("Polynomial Rolling Hash Table", hashPolynomialRolling)
+    ]
+
+    for attemptName, function in attempts:
+        stats = buildHashTables(function)
+        hashStatistics(attemptName, stats)
+
 
 if __name__ == "__main__":
     main()
