@@ -76,6 +76,22 @@ def hashDJB2(stringData):
         key = (key * 33) + ord(character)
     return key
 
+def hashFNV_1a(stringData):
+    #if stringData is none return and don't continue
+    if not stringData:
+        return 0
+    
+    #FNV-1a algorithm constants
+    prime = 16777619
+    offsetBasis = 2166136261
+
+    key = offsetBasis
+    for character in stringData:
+        key ^= ord(character)
+        key = (key * prime) & 0xffffffff
+    return key
+
+
 
 def buildHashTables(function):  
     #Create an empty Hash Table
@@ -210,7 +226,8 @@ def main():
         ("Simple Sum Hash Table", hashFunction),
         ("Polynomial Rolling Hash Table", hashPolynomialRolling),
         ("Multiplicative Hash Table", hashMultiplicative),
-        ("DJB2 Hash Table", hashDJB2)
+        ("DJB2 Hash Table", hashDJB2),
+        ("FNV-1a Hash Table", hashFNV_1a)
     ]
 
     #for each optimization attempt in the tuple above; it prints out a screenshot of the statistics
